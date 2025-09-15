@@ -1,0 +1,630 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D7540B192E50D77700640CD4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D7540B162E50D77700640CD4 /* Assets.xcassets */; };
+		D77F29A42E56D10900279E1C /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = D77F29A32E56D10900279E1C /* FirebaseAuth */; };
+		D77F29A62E56D10900279E1C /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = D77F29A52E56D10900279E1C /* FirebaseFirestore */; };
+		D77F29A82E56D10900279E1C /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = D77F29A72E56D10900279E1C /* FirebaseMessaging */; };
+		D77F29AA2E56D10900279E1C /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = D77F29A92E56D10900279E1C /* FirebaseStorage */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D7D58E1B2E3B89CB00C77AA9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D7D58E052E3B89CA00C77AA9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D7D58E0C2E3B89CA00C77AA9;
+			remoteInfo = PawFinder;
+		};
+		D7D58E252E3B89CB00C77AA9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D7D58E052E3B89CA00C77AA9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D7D58E0C2E3B89CA00C77AA9;
+			remoteInfo = PawFinder;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		D7540B162E50D77700640CD4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D7D58E0D2E3B89CA00C77AA9 /* PawFinder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PawFinder.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D7D58E1A2E3B89CB00C77AA9 /* PawFinderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PawFinderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D7D58E242E3B89CB00C77AA9 /* PawFinderUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PawFinderUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		D7536EB22E559C6300B00D20 /* Exceptions for "PawFinder" folder in "PawFinder" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = D7D58E0C2E3B89CA00C77AA9 /* PawFinder */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		D7C153E52E51CBFB00D36A90 /* PawFinder */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				D7536EB22E559C6300B00D20 /* Exceptions for "PawFinder" folder in "PawFinder" target */,
+			);
+			path = PawFinder;
+			sourceTree = "<group>";
+		};
+		D7D58E1D2E3B89CB00C77AA9 /* PawFinderTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = PawFinderTests;
+			sourceTree = "<group>";
+		};
+		D7D58E272E3B89CB00C77AA9 /* PawFinderUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = PawFinderUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D7D58E0A2E3B89CA00C77AA9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D77F29A82E56D10900279E1C /* FirebaseMessaging in Frameworks */,
+				D77F29AA2E56D10900279E1C /* FirebaseStorage in Frameworks */,
+				D77F29A42E56D10900279E1C /* FirebaseAuth in Frameworks */,
+				D77F29A62E56D10900279E1C /* FirebaseFirestore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D7D58E172E3B89CB00C77AA9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D7D58E212E3B89CB00C77AA9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D7D58E042E3B89CA00C77AA9 = {
+			isa = PBXGroup;
+			children = (
+				D7C153E52E51CBFB00D36A90 /* PawFinder */,
+				D7D58E1D2E3B89CB00C77AA9 /* PawFinderTests */,
+				D7D58E272E3B89CB00C77AA9 /* PawFinderUITests */,
+				D7D58E0E2E3B89CA00C77AA9 /* Products */,
+				D7540B162E50D77700640CD4 /* Assets.xcassets */,
+			);
+			sourceTree = "<group>";
+		};
+		D7D58E0E2E3B89CA00C77AA9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D7D58E0D2E3B89CA00C77AA9 /* PawFinder.app */,
+				D7D58E1A2E3B89CB00C77AA9 /* PawFinderTests.xctest */,
+				D7D58E242E3B89CB00C77AA9 /* PawFinderUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D7D58E0C2E3B89CA00C77AA9 /* PawFinder */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D7D58E2E2E3B89CB00C77AA9 /* Build configuration list for PBXNativeTarget "PawFinder" */;
+			buildPhases = (
+				D7D58E092E3B89CA00C77AA9 /* Sources */,
+				D7D58E0A2E3B89CA00C77AA9 /* Frameworks */,
+				D7D58E0B2E3B89CA00C77AA9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				D7C153E52E51CBFB00D36A90 /* PawFinder */,
+			);
+			name = PawFinder;
+			packageProductDependencies = (
+				D77F29A32E56D10900279E1C /* FirebaseAuth */,
+				D77F29A52E56D10900279E1C /* FirebaseFirestore */,
+				D77F29A72E56D10900279E1C /* FirebaseMessaging */,
+				D77F29A92E56D10900279E1C /* FirebaseStorage */,
+			);
+			productName = PawFinder;
+			productReference = D7D58E0D2E3B89CA00C77AA9 /* PawFinder.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D7D58E192E3B89CB00C77AA9 /* PawFinderTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D7D58E312E3B89CB00C77AA9 /* Build configuration list for PBXNativeTarget "PawFinderTests" */;
+			buildPhases = (
+				D7D58E162E3B89CB00C77AA9 /* Sources */,
+				D7D58E172E3B89CB00C77AA9 /* Frameworks */,
+				D7D58E182E3B89CB00C77AA9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D7D58E1C2E3B89CB00C77AA9 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				D7D58E1D2E3B89CB00C77AA9 /* PawFinderTests */,
+			);
+			name = PawFinderTests;
+			packageProductDependencies = (
+			);
+			productName = PawFinderTests;
+			productReference = D7D58E1A2E3B89CB00C77AA9 /* PawFinderTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D7D58E232E3B89CB00C77AA9 /* PawFinderUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D7D58E342E3B89CB00C77AA9 /* Build configuration list for PBXNativeTarget "PawFinderUITests" */;
+			buildPhases = (
+				D7D58E202E3B89CB00C77AA9 /* Sources */,
+				D7D58E212E3B89CB00C77AA9 /* Frameworks */,
+				D7D58E222E3B89CB00C77AA9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D7D58E262E3B89CB00C77AA9 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				D7D58E272E3B89CB00C77AA9 /* PawFinderUITests */,
+			);
+			name = PawFinderUITests;
+			packageProductDependencies = (
+			);
+			productName = PawFinderUITests;
+			productReference = D7D58E242E3B89CB00C77AA9 /* PawFinderUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D7D58E052E3B89CA00C77AA9 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1640;
+				LastUpgradeCheck = 1640;
+				TargetAttributes = {
+					D7D58E0C2E3B89CA00C77AA9 = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					D7D58E192E3B89CB00C77AA9 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = D7D58E0C2E3B89CA00C77AA9;
+					};
+					D7D58E232E3B89CB00C77AA9 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = D7D58E0C2E3B89CA00C77AA9;
+					};
+				};
+			};
+			buildConfigurationList = D7D58E082E3B89CA00C77AA9 /* Build configuration list for PBXProject "PawFinder" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D7D58E042E3B89CA00C77AA9;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D77F29A22E56D10900279E1C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = D7D58E0E2E3B89CA00C77AA9 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D7D58E0C2E3B89CA00C77AA9 /* PawFinder */,
+				D7D58E192E3B89CB00C77AA9 /* PawFinderTests */,
+				D7D58E232E3B89CB00C77AA9 /* PawFinderUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D7D58E0B2E3B89CA00C77AA9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D7540B192E50D77700640CD4 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D7D58E182E3B89CB00C77AA9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D7D58E222E3B89CB00C77AA9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D7D58E092E3B89CA00C77AA9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D7D58E162E3B89CB00C77AA9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D7D58E202E3B89CB00C77AA9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D7D58E1C2E3B89CB00C77AA9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D7D58E0C2E3B89CA00C77AA9 /* PawFinder */;
+			targetProxy = D7D58E1B2E3B89CB00C77AA9 /* PBXContainerItemProxy */;
+		};
+		D7D58E262E3B89CB00C77AA9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D7D58E0C2E3B89CA00C77AA9 /* PawFinder */;
+			targetProxy = D7D58E252E3B89CB00C77AA9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		D7D58E2C2E3B89CB00C77AA9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		D7D58E2D2E3B89CB00C77AA9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D7D58E2F2E3B89CB00C77AA9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = PawFinder/PawFinder.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RK6B6FF89S;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PawFinder/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = NIBM.PawFinder;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D7D58E302E3B89CB00C77AA9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = PawFinder/PawFinder.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = RK6B6FF89S;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PawFinder/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = NIBM.PawFinder;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		D7D58E322E3B89CB00C77AA9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = NIBM.PawFinderTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PawFinder.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PawFinder";
+			};
+			name = Debug;
+		};
+		D7D58E332E3B89CB00C77AA9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = NIBM.PawFinderTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PawFinder.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PawFinder";
+			};
+			name = Release;
+		};
+		D7D58E352E3B89CB00C77AA9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = NIBM.PawFinderUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = PawFinder;
+			};
+			name = Debug;
+		};
+		D7D58E362E3B89CB00C77AA9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = NIBM.PawFinderUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = PawFinder;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D7D58E082E3B89CA00C77AA9 /* Build configuration list for PBXProject "PawFinder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D7D58E2C2E3B89CB00C77AA9 /* Debug */,
+				D7D58E2D2E3B89CB00C77AA9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D7D58E2E2E3B89CB00C77AA9 /* Build configuration list for PBXNativeTarget "PawFinder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D7D58E2F2E3B89CB00C77AA9 /* Debug */,
+				D7D58E302E3B89CB00C77AA9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D7D58E312E3B89CB00C77AA9 /* Build configuration list for PBXNativeTarget "PawFinderTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D7D58E322E3B89CB00C77AA9 /* Debug */,
+				D7D58E332E3B89CB00C77AA9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D7D58E342E3B89CB00C77AA9 /* Build configuration list for PBXNativeTarget "PawFinderUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D7D58E352E3B89CB00C77AA9 /* Debug */,
+				D7D58E362E3B89CB00C77AA9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D77F29A22E56D10900279E1C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D77F29A32E56D10900279E1C /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D77F29A22E56D10900279E1C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		D77F29A52E56D10900279E1C /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D77F29A22E56D10900279E1C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		D77F29A72E56D10900279E1C /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D77F29A22E56D10900279E1C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		D77F29A92E56D10900279E1C /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D77F29A22E56D10900279E1C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = D7D58E052E3B89CA00C77AA9 /* Project object */;
+}
