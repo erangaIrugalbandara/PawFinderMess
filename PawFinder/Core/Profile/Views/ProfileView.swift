@@ -5,6 +5,7 @@ import PhotosUI
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = ProfileViewModel()
+    @EnvironmentObject var authViewModel: AuthViewModel // Add this line
 
     @State private var newName: String = ""
     @State private var oldPassword: String = ""
@@ -15,6 +16,7 @@ struct ProfileView: View {
     @State private var notificationMessages: Bool = true
     @State private var showSavedAlert = false
     @State private var showLogoutAlert = false
+    @State private var showingBiometricSettings = false // Add this line
     
     // Image picker states
     @State private var selectedItem: PhotosPickerItem? = nil
@@ -335,6 +337,97 @@ struct ProfileView: View {
                                             )
                                     )
                                     .disabled(true)
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 32)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(.ultraThickMaterial)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(
+                                            LinearGradient(
+                                                colors: [Color.white.opacity(0.5), Color.white.opacity(0.1)],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ),
+                                            lineWidth: 1
+                                        )
+                                )
+                        )
+                        .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
+                        .padding(.horizontal, 20)
+
+                        // 🔥 NEW: Security Settings Section
+                        VStack(spacing: 24) {
+                            VStack(alignment: .leading, spacing: 20) {
+                                HStack {
+                                    Image(systemName: "shield.fill")
+                                        .font(.system(size: 20, weight: .medium))
+                                        .foregroundStyle(
+                                            LinearGradient(
+                                                colors: [Color.green, Color.blue],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            )
+                                        )
+                                    
+                                    Text("Security Settings")
+                                        .font(.system(size: 20, weight: .bold))
+                                        .foregroundColor(.primary)
+                                    
+                                    Spacer()
+                                }
+                                
+                                VStack(spacing: 16) {
+                                    // Biometric Authentication Toggle
+                                    Button(action: {
+                                        showingBiometricSettings = true
+                                    }) {
+                                        HStack {
+                                            HStack(spacing: 12) {
+                                                Image(systemName: authViewModel.biometricIcon)
+                                                    .font(.system(size: 18, weight: .medium))
+                                                    .foregroundColor(.primary)
+                                                    .frame(width: 24)
+                                                
+                                                VStack(alignment: .leading, spacing: 4) {
+                                                    Text("\(authViewModel.biometricTypeName) Authentication")
+                                                        .font(.system(size: 16, weight: .semibold))
+                                                        .foregroundColor(.primary)
+                                                    
+                                                    Text(authViewModel.isBiometricEnabled ? "Enabled" : (authViewModel.biometricType == .none ? "Not Available" : "Available"))
+                                                        .font(.system(size: 14, weight: .medium))
+                                                        .foregroundColor(.secondary)
+                                                }
+                                            }
+                                            
+                                            Spacer()
+                                            
+                                            HStack(spacing: 8) {
+                                                // Status indicator
+                                                Circle()
+                                                    .fill(authViewModel.isBiometricEnabled ? Color.green : (authViewModel.biometricType == .none ? Color.gray : Color.orange))
+                                                    .frame(width: 8, height: 8)
+                                                
+                                                Image(systemName: "chevron.right")
+                                                    .font(.system(size: 14, weight: .medium))
+                                                    .foregroundColor(.secondary)
+                                            }
+                                        }
+                                        .padding(.vertical, 12)
+                                        .padding(.horizontal, 16)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .fill(.ultraThinMaterial)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 12)
+                                                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                                )
+                                        )
+                                    }
+                                }
                             }
                         }
                         .padding(.horizontal, 24)
@@ -702,6 +795,21 @@ struct ProfileView: View {
             matching: .images,
             photoLibrary: .shared()
         )
+        // 🔥 NEW: Navigate to Biometric Settings
+        .fullScreenCover(isPresented: $showingBiometricSettings) {
+            NavigationView {
+                BiometricSettingsView()
+                    .environmentObject(authViewModel)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button("Done") {
+                                showingBiometricSettings = false
+                            }
+                        }
+                    }
+            }
+        }
         .alert("Profile Updated", isPresented: $showSavedAlert) {
             Button("OK") { }
         } message: {
@@ -849,4 +957,5 @@ struct NotificationToggle: View {
 
 #Preview {
     ProfileView()
+        .environmentObject(AuthViewModel())
 }

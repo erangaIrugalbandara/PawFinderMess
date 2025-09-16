@@ -66,6 +66,10 @@ struct DashboardView: View {
             CommunityUpdatesView()
                 .environmentObject(authViewModel)
         }
+        .fullScreenCover(isPresented: $showingProfileView) {
+            ProfileView()
+                .environmentObject(authViewModel) // 🔥 ADD THIS LINE
+        }
     }
     
     // MARK: - Header Section
