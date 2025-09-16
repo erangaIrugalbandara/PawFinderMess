@@ -5,7 +5,7 @@ import PhotosUI
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = ProfileViewModel()
-    @EnvironmentObject var authViewModel: AuthViewModel // Add this line
+    @EnvironmentObject var authViewModel: AuthViewModel
 
     @State private var newName: String = ""
     @State private var oldPassword: String = ""
@@ -16,7 +16,7 @@ struct ProfileView: View {
     @State private var notificationMessages: Bool = true
     @State private var showSavedAlert = false
     @State private var showLogoutAlert = false
-    @State private var showingBiometricSettings = false // Add this line
+    @State private var showingBiometricSettings = false
     
     // Image picker states
     @State private var selectedItem: PhotosPickerItem? = nil
@@ -25,15 +25,10 @@ struct ProfileView: View {
     @State private var showingImagePicker = false
 
     var hasChanges: Bool {
-        // Check if name has actually changed (not just empty)
         let nameChanged = !newName.isEmpty && newName != viewModel.userName
-        
-        // Check if notifications have changed
         let notificationsChanged = notificationGeneral != viewModel.notificationGeneral ||
                                  notificationLostPets != viewModel.notificationLostPets ||
                                  notificationMessages != viewModel.notificationMessages
-        
-        // Check if password fields are filled (all three must be filled for password change)
         let passwordChange = !oldPassword.isEmpty && !newPassword.isEmpty && !retypePassword.isEmpty
         
         return nameChanged || notificationsChanged || passwordChange
@@ -45,7 +40,7 @@ struct ProfileView: View {
     
     var isPasswordChangeValid: Bool {
         if newPassword.isEmpty && retypePassword.isEmpty && oldPassword.isEmpty {
-            return true // No password change
+            return true
         }
         return !oldPassword.isEmpty && !newPassword.isEmpty && !retypePassword.isEmpty && passwordsMatch && newPassword.count >= 6
     }
@@ -53,7 +48,6 @@ struct ProfileView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Enhanced gradient background
                 LinearGradient(
                     gradient: Gradient(colors: [
                         Color(red: 0.35, green: 0.25, blue: 0.8),
@@ -78,7 +72,6 @@ struct ProfileView: View {
                                         .font(.system(size: 17, weight: .medium))
                                         .foregroundColor(.white)
                                 }
-                                
                             }
                             
                             Spacer()
@@ -359,7 +352,7 @@ struct ProfileView: View {
                         .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
                         .padding(.horizontal, 20)
 
-                        // 🔥 NEW: Security Settings Section
+                        // Security Settings Section
                         VStack(spacing: 24) {
                             VStack(alignment: .leading, spacing: 20) {
                                 HStack {
@@ -393,11 +386,11 @@ struct ProfileView: View {
                                                     .frame(width: 24)
                                                 
                                                 VStack(alignment: .leading, spacing: 4) {
-                                                    Text("\(authViewModel.biometricTypeName) Authentication")
+                                                    Text("\(authViewModel.biometricName) Authentication")
                                                         .font(.system(size: 16, weight: .semibold))
                                                         .foregroundColor(.primary)
                                                     
-                                                    Text(authViewModel.isBiometricEnabled ? "Enabled" : (authViewModel.biometricType == .none ? "Not Available" : "Available"))
+                                                    Text(authViewModel.isBiometricEnabled ? "Enabled" : (authViewModel.isBiometricAvailable ? "Available" : "Not Available"))
                                                         .font(.system(size: 14, weight: .medium))
                                                         .foregroundColor(.secondary)
                                                 }
@@ -408,7 +401,7 @@ struct ProfileView: View {
                                             HStack(spacing: 8) {
                                                 // Status indicator
                                                 Circle()
-                                                    .fill(authViewModel.isBiometricEnabled ? Color.green : (authViewModel.biometricType == .none ? Color.gray : Color.orange))
+                                                    .fill(authViewModel.isBiometricEnabled ? Color.green : (authViewModel.isBiometricAvailable ? Color.orange : Color.gray))
                                                     .frame(width: 8, height: 8)
                                                 
                                                 Image(systemName: "chevron.right")
@@ -795,19 +788,12 @@ struct ProfileView: View {
             matching: .images,
             photoLibrary: .shared()
         )
-        // 🔥 NEW: Navigate to Biometric Settings
         .fullScreenCover(isPresented: $showingBiometricSettings) {
             NavigationView {
                 BiometricSettingsView()
                     .environmentObject(authViewModel)
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarLeading) {
-                            Button("Done") {
-                                showingBiometricSettings = false
-                            }
-                        }
-                    }
+                    .navigationBarTitleDisplayMode(.inline)                   
+                    
             }
         }
         .alert("Profile Updated", isPresented: $showSavedAlert) {
@@ -835,7 +821,6 @@ struct ProfileView: View {
     }
     
     private func setupInitialValues() {
-        // Only set initial values if they haven't been set yet or if the viewModel values have changed
         if newName.isEmpty || newName == viewModel.userName {
             newName = viewModel.userName
         }
@@ -890,8 +875,6 @@ struct ProfileView: View {
     private func logout() {
         do {
             try Auth.auth().signOut()
-            // Navigate to login screen or handle logout
-            // You might need to update your app's root view or navigation state
             dismiss()
         } catch let signOutError as NSError {
             viewModel.errorMessage = "Error signing out: \(signOutError.localizedDescription)"

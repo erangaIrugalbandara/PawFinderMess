@@ -11,19 +11,13 @@ struct ContentView: View {
                     // Loading screen while initializing
                     splashScreen
                 } else if authViewModel.isAuthenticated {
-                    // User is signed into Firebase - show main app
+                    // User is authenticated - show main app
                     DashboardView()
                         .environmentObject(authViewModel)
                 } else {
-                    // User is not signed in
-                    if authViewModel.isBiometricEnabled {
-                        // User has biometric set up - show biometric auth
-                        BiometricAuthView()
-                            .environmentObject(authViewModel)
-                    } else {
-                        // No biometric or first time - show welcome
-                        WelcomeView()
-                    }
+                    // User is not authenticated - show welcome screen
+                    WelcomeView()
+                        .environmentObject(authViewModel)
                 }
             }
         }
@@ -33,9 +27,6 @@ struct ContentView: View {
         }
         .onChange(of: authViewModel.isAuthenticated) { _, isAuth in
             print("🔐 Auth state changed: \(isAuth)")
-        }
-        .onChange(of: authViewModel.isBiometricEnabled) { _, isEnabled in
-            print("🔐 Biometric enabled changed: \(isEnabled)")
         }
     }
     
@@ -82,8 +73,7 @@ struct ContentView: View {
                 isInitialized = true
             }
             
-            // Debug current state
-            print("🔐 ContentView initialized - Authenticated: \(authViewModel.isAuthenticated), BiometricEnabled: \(authViewModel.isBiometricEnabled)")
+            print("🔐 ContentView initialized - Authenticated: \(authViewModel.isAuthenticated)")
         }
     }
 }

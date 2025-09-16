@@ -60,12 +60,11 @@ struct LoginView: View {
                             )
                     }
                     
-                    // 🔥 SEPARATE BIOMETRIC BUTTON - Only show if enabled
-                    if authViewModel.isBiometricEnabled && authViewModel.biometricType != .none {
+                    // Biometric Authentication Button (Only show if enabled)
+                    if authViewModel.isBiometricEnabled {
                         VStack(spacing: 20) {
-                            // Prominent Biometric Sign-In Button
                             Button(action: {
-                                authenticateWithBiometrics()
+                                authenticateWithBiometric()
                             }) {
                                 VStack(spacing: 16) {
                                     if isAuthenticatingBiometric {
@@ -78,7 +77,7 @@ struct LoginView: View {
                                             .foregroundColor(.white)
                                     }
                                     
-                                    Text(isAuthenticatingBiometric ? "Authenticating..." : "Sign in using \(authViewModel.biometricTypeName)")
+                                    Text(isAuthenticatingBiometric ? "Authenticating..." : "Sign in using \(authViewModel.biometricName)")
                                         .font(.system(size: 18, weight: .semibold))
                                         .foregroundColor(.white)
                                         .multilineTextAlignment(.center)
@@ -110,7 +109,7 @@ struct LoginView: View {
                         }
                     }
                     
-                    // Email/Password Form - CLEAN, NO BIOMETRIC MIXING
+                    // Email/Password Form
                     VStack(spacing: 16) {
                         // Email Field
                         VStack(spacing: 8) {
@@ -158,7 +157,7 @@ struct LoginView: View {
                             )
                         }
                         
-                        // Forgot Password - NO CHECKBOXES
+                        // Forgot Password
                         HStack {
                             Spacer()
                             
@@ -172,15 +171,15 @@ struct LoginView: View {
                     }
                     .padding(.horizontal, 24)
                     
-                    // 🔥 SETUP PROMOTION - Only if biometric available but not enabled
-                    if authViewModel.biometricType != .none && !authViewModel.isBiometricEnabled {
+                    // Biometric Setup Promotion (Only if biometric available but not enabled)
+                    if authViewModel.isBiometricAvailable && !authViewModel.isBiometricEnabled {
                         VStack(spacing: 16) {
                             VStack(spacing: 12) {
                                 Image(systemName: authViewModel.biometricIcon)
                                     .font(.system(size: 30))
                                     .foregroundColor(.white.opacity(0.8))
                                 
-                                Text("Enable \(authViewModel.biometricTypeName) for faster login?")
+                                Text("Enable \(authViewModel.biometricName) for faster login?")
                                     .font(.system(size: 16, weight: .semibold))
                                     .foregroundColor(.white)
                                     .multilineTextAlignment(.center)
@@ -203,7 +202,7 @@ struct LoginView: View {
                         }
                     }
                     
-                    // Sign In with Email Button - ALWAYS SIMPLE
+                    // Sign In Button
                     Button(action: {
                         signInWithEmail()
                     }) {
@@ -262,20 +261,19 @@ struct LoginView: View {
     }
     
     // MARK: - Methods
-    private func authenticateWithBiometrics() {
+    private func authenticateWithBiometric() {
         guard !isAuthenticatingBiometric else { return }
         
         isAuthenticatingBiometric = true
         authViewModel.errorMessage = nil
         
         Task {
-            let success = await authViewModel.signInWithBiometrics()
+            let success = await authViewModel.signInWithBiometric()
             
             await MainActor.run {
                 self.isAuthenticatingBiometric = false
                 if !success {
                     print("❌ Biometric authentication failed")
-                    // Error message is already set by AuthViewModel
                 }
             }
         }
@@ -284,12 +282,8 @@ struct LoginView: View {
     private func signInWithEmail() {
         guard isFormValid && !authViewModel.isLoading else { return }
         
-        // Hide keyboard
         hideKeyboard()
-        
-        // Never enable biometric automatically from login
-        // User should set it up from Profile settings
-        authViewModel.signIn(email: email, password: password, enableBiometric: false)
+        authViewModel.signIn(email: email, password: password)
     }
     
     private func resetPassword() {

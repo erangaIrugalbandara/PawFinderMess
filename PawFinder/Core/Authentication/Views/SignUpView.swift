@@ -235,13 +235,13 @@ struct SignUpView: View {
                 }
             }
         }
-        .onChange(of: authViewModel.shouldShowBiometricPrompt) { _, shouldShow in
-            if shouldShow && authViewModel.isAuthenticated {
-                // User just signed up successfully, show biometric setup prompt
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    // This will be handled by the main ContentView flow
-                }
+        .alert("Enable Biometric Authentication?", isPresented: .constant(authViewModel.isAuthenticated && authViewModel.isBiometricAvailable && !authViewModel.isBiometricEnabled)) {
+            Button("Not Now", role: .cancel) { }
+            Button("Enable") {
+                // Navigate to profile settings
             }
+        } message: {
+            Text("Enable \(authViewModel.biometricName) for faster login in your Profile settings.")
         }
     }
     

@@ -1,179 +1,187 @@
 import SwiftUI
 import FirebaseAuth
-import FirebaseFirestore
 
 struct BiometricSettingsView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @Environment(\.dismiss) private var dismiss
     
-    @State private var showingDisableConfirmation = false
-    @State private var showingEnablePrompt = false
-    @State private var passwordForBiometric = ""
+    @State private var showingEnableAlert = false
+    @State private var showingDisableAlert = false
+    @State private var passwordForEnable = ""
     @State private var isEnabling = false
-    @State private var showingPasswordAlert = false
+    @State private var isTestingBiometric = false
     @State private var testResult: String?
     @State private var errorMessage: String?
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 8) {
-                        Image(systemName: authViewModel.biometricIcon)
-                            .font(.system(size: 20))
-                            .foregroundColor(.primary)
-                        
-                        Text("\(authViewModel.biometricTypeName) Authentication")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.primary)
-                    }
-                    
-                    Text("Quick and secure access to your account")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-                
-                // Status indicator
-                ZStack {
-                    Circle()
-                        .fill(authViewModel.isBiometricEnabled ? Color.green.opacity(0.2) : Color.gray.opacity(0.2))
-                        .frame(width: 12, height: 12)
-                    
-                    Circle()
-                        .fill(authViewModel.isBiometricEnabled ? Color.green : Color.gray)
-                        .frame(width: 6, height: 6)
-                }
-            }
-            .padding(.vertical, 16)
+        ZStack {
+            // Background gradient matching app theme
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.35, green: 0.25, blue: 0.8),
+                    Color(red: 0.55, green: 0.35, blue: 0.9),
+                    Color(red: 0.65, green: 0.45, blue: 0.95)
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
             
-            Divider()
-            
-            // Settings Content
-            VStack(spacing: 20) {
-                // Error Message Display
-                if let errorMessage = errorMessage {
-                    HStack {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(.red)
-                        Text(errorMessage)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.red)
-                        Spacer()
-                        Button("Dismiss") {
-                            self.errorMessage = nil
-                        }
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.blue)
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.red.opacity(0.1))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.red.opacity(0.2), lineWidth: 1)
-                            )
-                    )
-                }
-                
-                // Toggle Switch
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Enable \(authViewModel.biometricTypeName)")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primary)
-                        
-                        Text(statusText)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Spacer()
-                    
-                    Toggle("", isOn: Binding(
-                        get: { authViewModel.isBiometricEnabled },
-                        set: { newValue in
-                            handleToggleChange(newValue)
-                        }
-                    ))
-                    .disabled(authViewModel.biometricType == .none || isEnabling)
-                }
-                .padding(.vertical, 8)
-                
-                if authViewModel.biometricType == .none {
-                    // Device doesn't support biometric
-                    notSupportedCard
-                } else if authViewModel.isBiometricEnabled {
-                    // Biometric is enabled
-                    enabledCard
-                    testButton
-                } else {
-                    // Biometric is available but not enabled
-                    availableCard
-                    enableButton
-                }
-                
-                // Test Result
-                if let testResult = testResult {
-                    Text(testResult)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(testResult.contains("successful") ? .green : .red)
-                        .padding(.top, 8)
-                        .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                self.testResult = nil
+            ScrollView {
+                VStack(spacing: 32) {
+                    // Header Section
+                    VStack(spacing: 16) {
+                        HStack(spacing: 12) {
+                            Image(systemName: authViewModel.biometricIcon)
+                                .font(.system(size: 28, weight: .medium))
+                                .foregroundColor(.white)
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("\(authViewModel.biometricName) Authentication")
+                                    .font(.system(size: 24, weight: .bold))
+                                    .foregroundColor(.white)
+                                
+                                Text("Quick and secure access to your account")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(.white.opacity(0.8))
+                            }
+                            
+                            Spacer()
+                            
+                            // Status indicator
+                            ZStack {
+                                Circle()
+                                    .fill(authViewModel.isBiometricEnabled ? Color.green.opacity(0.3) : Color.gray.opacity(0.3))
+                                    .frame(width: 16, height: 16)
+                                
+                                Circle()
+                                    .fill(authViewModel.isBiometricEnabled ? Color.green : Color.gray)
+                                    .frame(width: 8, height: 8)
                             }
                         }
+                        .padding(.horizontal, 24)
+                        .padding(.top, 20)
+                    }
+                    
+                    // Content Card
+                    VStack(spacing: 24) {
+                        // Error Message Display
+                        if let errorMessage = errorMessage {
+                            HStack {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.red)
+                                Text(errorMessage)
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.red)
+                                Spacer()
+                                Button("Dismiss") {
+                                    self.errorMessage = nil
+                                }
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.blue)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.red.opacity(0.1))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.red.opacity(0.2), lineWidth: 1)
+                                    )
+                            )
+                        }
+                        
+                        if !authViewModel.isBiometricAvailable {
+                            // Device doesn't support biometric
+                            notSupportedCard
+                        } else if authViewModel.isBiometricEnabled {
+                            // Biometric is enabled
+                            enabledCard
+                            testButton
+                            disableButton
+                        } else {
+                            // Biometric is available but not enabled
+                            availableCard
+                            enableButton
+                        }
+                        
+                        // Test Result
+                        if let testResult = testResult {
+                            Text(testResult)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(testResult.contains("successful") ? .green : .red)
+                                .padding(.vertical, 8)
+                                .onAppear {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                        self.testResult = nil
+                                    }
+                                }
+                        }
+                        
+                        // Security Information
+                        securityInfoCard
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 32)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(.ultraThickMaterial)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .stroke(
+                                        LinearGradient(
+                                            colors: [Color.white.opacity(0.5), Color.white.opacity(0.1)],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ),
+                                        lineWidth: 1
+                                    )
+                            )
+                    )
+                    .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
+                    .padding(.horizontal, 20)
+                    
+                    Spacer()
                 }
-                
-                // Security Information
-                securityInfoCard
             }
-            .padding(.top, 20)
-            
-            Spacer()
         }
-        .padding(.horizontal, 20)
-        .navigationTitle("Biometric Settings")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden()
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button("Done") {
+                Button(action: {
                     dismiss()
+                }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.white)
+                        Text("Back")
+                            .font(.system(size: 17, weight: .medium))
+                            .foregroundColor(.white)
+                    }
                 }
             }
         }
-        .alert("Disable \(authViewModel.biometricTypeName)?", isPresented: $showingDisableConfirmation) {
+        .alert("Enable \(authViewModel.biometricName)?", isPresented: $showingEnableAlert) {
+            SecureField("Enter your password", text: $passwordForEnable)
+            Button("Cancel", role: .cancel) {
+                passwordForEnable = ""
+            }
+            Button("Enable") {
+                enableBiometric()
+            }
+            .disabled(passwordForEnable.isEmpty)
+        } message: {
+            Text("Please enter your current password to enable \(authViewModel.biometricName) authentication.")
+        }
+        .alert("Disable \(authViewModel.biometricName)?", isPresented: $showingDisableAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Disable", role: .destructive) {
-                handleDisableBiometric()
+                disableBiometric()
             }
         } message: {
             Text("You'll need to use your email and password to sign in. You can always re-enable this later.")
-        }
-        .alert("Enable \(authViewModel.biometricTypeName)?", isPresented: $showingEnablePrompt) {
-            Button("Cancel", role: .cancel) { }
-            Button("Continue") {
-                showingPasswordAlert = true
-            }
-        } message: {
-            Text("You'll need to confirm your password to set up \(authViewModel.biometricTypeName) authentication.")
-        }
-        .alert("Confirm Password", isPresented: $showingPasswordAlert) {
-            SecureField("Enter your password", text: $passwordForBiometric)
-            Button("Cancel", role: .cancel) {
-                handlePasswordAlertCancel()
-            }
-            Button("Enable") {
-                handleEnableBiometric()
-            }
-            .disabled(passwordForBiometric.isEmpty)
-        } message: {
-            Text("Please enter your current password to enable \(authViewModel.biometricTypeName).")
         }
     }
     
@@ -182,26 +190,26 @@ struct BiometricSettingsView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 16))
+                    .font(.system(size: 20))
                     .foregroundColor(.orange)
                 
                 Text("Not Supported")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.orange)
             }
             
             Text("This device doesn't support biometric authentication. Please use email and password to sign in.")
-                .font(.system(size: 14, weight: .medium))
+                .font(.system(size: 15, weight: .medium))
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(16)
+        .padding(20)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.orange.opacity(0.1))
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.ultraThinMaterial)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.orange.opacity(0.2), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.orange.opacity(0.3), lineWidth: 1)
                 )
         )
     }
@@ -210,26 +218,26 @@ struct BiometricSettingsView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 16))
+                    .font(.system(size: 20))
                     .foregroundColor(.green)
                 
                 Text("Enabled")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.green)
             }
             
-            Text("\(authViewModel.biometricTypeName) is active. You can use it to quickly sign into PawFinder.")
-                .font(.system(size: 14, weight: .medium))
+            Text("\(authViewModel.biometricName) is active. You can use it to quickly sign into PawFinder.")
+                .font(.system(size: 15, weight: .medium))
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(16)
+        .padding(20)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.green.opacity(0.1))
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.ultraThinMaterial)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.green.opacity(0.2), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.green.opacity(0.3), lineWidth: 1)
                 )
         )
     }
@@ -238,33 +246,33 @@ struct BiometricSettingsView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
                 Image(systemName: "hand.raised.fill")
-                    .font(.system(size: 16))
+                    .font(.system(size: 20))
                     .foregroundColor(.blue)
                 
                 Text("Available")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.blue)
             }
             
-            Text("Enable \(authViewModel.biometricTypeName) for quick and secure access while keeping email and password as backup.")
-                .font(.system(size: 14, weight: .medium))
+            Text("Enable \(authViewModel.biometricName) for quick and secure access while keeping email and password as backup.")
+                .font(.system(size: 15, weight: .medium))
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(16)
+        .padding(20)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.blue.opacity(0.1))
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.ultraThinMaterial)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.blue.opacity(0.2), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.blue.opacity(0.3), lineWidth: 1)
                 )
         )
     }
     
     private var enableButton: some View {
         Button(action: {
-            showingEnablePrompt = true
+            showingEnableAlert = true
         }) {
             HStack(spacing: 12) {
                 if isEnabling {
@@ -273,21 +281,57 @@ struct BiometricSettingsView: View {
                         .scaleEffect(0.8)
                 } else {
                     Image(systemName: authViewModel.biometricIcon)
-                        .font(.system(size: 16))
+                        .font(.system(size: 16, weight: .medium))
                 }
                 
-                Text(isEnabling ? "Enabling..." : "Enable \(authViewModel.biometricTypeName)")
-                    .font(.system(size: 16, weight: .semibold))
+                Text(isEnabling ? "Enabling..." : "Enable \(authViewModel.biometricName)")
+                    .font(.system(size: 18, weight: .semibold))
             }
             .foregroundColor(.white)
             .frame(maxWidth: .infinity)
-            .frame(height: 44)
+            .frame(height: 52)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.blue)
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.blue, Color.purple],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                    )
             )
+            .shadow(color: Color.blue.opacity(0.3), radius: 15, x: 0, y: 8)
         }
         .disabled(isEnabling)
+    }
+    
+    private var disableButton: some View {
+        Button(action: {
+            showingDisableAlert = true
+        }) {
+            HStack(spacing: 12) {
+                Image(systemName: "xmark.circle")
+                    .font(.system(size: 16, weight: .medium))
+                
+                Text("Disable \(authViewModel.biometricName)")
+                    .font(.system(size: 16, weight: .medium))
+            }
+            .foregroundColor(.red)
+            .frame(maxWidth: .infinity)
+            .frame(height: 48)
+            .background(
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(.ultraThinMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(Color.red.opacity(0.3), lineWidth: 1)
+                    )
+            )
+        }
     }
     
     private var testButton: some View {
@@ -295,174 +339,150 @@ struct BiometricSettingsView: View {
             testBiometric()
         }) {
             HStack(spacing: 12) {
-                Image(systemName: authViewModel.biometricIcon)
-                    .font(.system(size: 16))
+                if isTestingBiometric {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .primary))
+                        .scaleEffect(0.8)
+                } else {
+                    Image(systemName: authViewModel.biometricIcon)
+                        .font(.system(size: 16, weight: .medium))
+                }
                 
-                Text("Test \(authViewModel.biometricTypeName)")
-                    .font(.system(size: 16, weight: .medium))
+                Text(isTestingBiometric ? "Testing..." : "Test \(authViewModel.biometricName)")
+                    .font(.system(size: 16, weight: .semibold))
             }
             .foregroundColor(.primary)
             .frame(maxWidth: .infinity)
-            .frame(height: 44)
+            .frame(height: 48)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.primary.opacity(0.2), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(.ultraThinMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(Color.primary.opacity(0.3), lineWidth: 1)
+                    )
             )
         }
+        .disabled(isTestingBiometric)
     }
     
     private var securityInfoCard: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
                 Image(systemName: "shield.fill")
-                    .font(.system(size: 14))
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundColor(.secondary)
                 
                 Text("Security Information")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.secondary)
             }
             
-            Text("• Your biometric data never leaves your device\n• PawFinder cannot access your biometric information\n• You can disable this feature at any time\n• Email and password will always work as backup")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 8) {
+                SecurityInfoRow(text: "Your biometric data never leaves your device")
+                SecurityInfoRow(text: "PawFinder cannot access your biometric information")
+                SecurityInfoRow(text: "You can disable this feature at any time")
+                SecurityInfoRow(text: "Email and password will always work as backup")
+            }
         }
-        .padding(.top, 8)
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                )
+        )
     }
     
-    // MARK: - Computed Properties
-    private var statusText: String {
-        if authViewModel.biometricType == .none {
-            return "Not supported on this device"
-        } else if authViewModel.isBiometricEnabled {
-            return "Quick sign-in is active"
-        } else {
-            return "Tap to enable quick access"
-        }
-    }
-    
-    // MARK: - Action Handlers (Crash Prevention)
-    private func handleToggleChange(_ newValue: Bool) {
-        // Clear any existing errors
-        errorMessage = nil
-        
-        // Validate prerequisites
-        guard authViewModel.currentUser != nil else {
-            errorMessage = "User not signed in"
-            return
-        }
-        
-        guard authViewModel.biometricType != .none else {
-            errorMessage = "Biometric authentication not supported"
-            return
-        }
-        
-        if newValue {
-            showingEnablePrompt = true
-        } else {
-            showingDisableConfirmation = true
-        }
-    }
-    
-    private func handleDisableBiometric() {
-        do {
-            authViewModel.disableBiometricAuthentication()
-            errorMessage = nil
-        } catch {
-            errorMessage = "Failed to disable biometric: \(error.localizedDescription)"
-        }
-    }
-    
-    private func handlePasswordAlertCancel() {
-        passwordForBiometric = ""
-        errorMessage = nil
-    }
-    
-    private func handleEnableBiometric() {
-        // Validate inputs
+    // MARK: - Methods
+    private func enableBiometric() {
         guard let userEmail = authViewModel.currentUser?.email,
-              !userEmail.isEmpty else {
-            errorMessage = "User email not available"
-            passwordForBiometric = ""
+              !passwordForEnable.isEmpty else {
+            errorMessage = "Email or password is missing"
+            passwordForEnable = ""
             return
         }
         
-        guard !passwordForBiometric.isEmpty else {
-            errorMessage = "Password is required"
-            return
-        }
-        
-        // Validate password format (basic check)
-        guard passwordForBiometric.count >= 6 else {
-            errorMessage = "Password must be at least 6 characters"
-            return
-        }
-        
-        // Clear any existing errors
-        errorMessage = nil
         isEnabling = true
+        errorMessage = nil
         
-        // Use a Task to handle the async operation safely
-        Task { @MainActor in
+        Task {
+            // First verify password
             do {
-                // First verify the password with Firebase
-                try await verifyPassword(email: userEmail, password: passwordForBiometric)
+                let credential = EmailAuthProvider.credential(withEmail: userEmail, password: passwordForEnable)
+                try await Auth.auth().currentUser?.reauthenticate(with: credential)
                 
                 // If password is correct, enable biometric
-                authViewModel.enableBiometricAuthentication(email: userEmail, password: passwordForBiometric)
+                let result = await authViewModel.enableBiometric(email: userEmail, password: passwordForEnable)
                 
-                // Monitor for any errors from the AuthViewModel
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                    if let authError = authViewModel.errorMessage {
-                        self.errorMessage = authError
+                await MainActor.run {
+                    if result.success {
+                        self.testResult = "✅ \(authViewModel.biometricName) enabled successfully!"
+                    } else {
+                        self.errorMessage = result.error
                     }
                     
-                    // Clean up
-                    self.passwordForBiometric = ""
+                    self.passwordForEnable = ""
                     self.isEnabling = false
                 }
                 
             } catch {
-                self.errorMessage = "Password verification failed: \(error.localizedDescription)"
-                self.passwordForBiometric = ""
-                self.isEnabling = false
+                await MainActor.run {
+                    self.errorMessage = "Password verification failed"
+                    self.passwordForEnable = ""
+                    self.isEnabling = false
+                }
             }
         }
     }
     
-    // MARK: - Helper Methods
-    @MainActor
-    private func verifyPassword(email: String, password: String) async throws {
-        // Create a temporary credential to test the password
-        let credential = EmailAuthProvider.credential(withEmail: email, password: password)
-        
-        // Try to reauthenticate the current user
-        guard let currentUser = Auth.auth().currentUser else {
-            throw NSError(domain: "AuthError", code: 1, userInfo: [NSLocalizedDescriptionKey: "No current user"])
-        }
-        
-        try await currentUser.reauthenticate(with: credential)
+    private func disableBiometric() {
+        authViewModel.disableBiometric()
+        testResult = "Biometric authentication disabled"
+        errorMessage = nil
     }
     
     private func testBiometric() {
-        Task { @MainActor in
-            do {
-                let success = await authViewModel.testBiometricAuthentication()
+        isTestingBiometric = true
+        
+        Task {
+            let result = await authViewModel.testBiometric()
+            
+            await MainActor.run {
+                self.isTestingBiometric = false
                 
-                if success {
-                    testResult = "✅ \(authViewModel.biometricTypeName) test successful!"
+                if result.success {
+                    self.testResult = "✅ \(authViewModel.biometricName) test successful!"
                     
                     // Haptic feedback
                     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
                     impactFeedback.impactOccurred()
                 } else {
-                    testResult = "❌ \(authViewModel.biometricTypeName) test failed"
+                    self.testResult = "❌ Test failed"
+                    if let error = result.error {
+                        self.errorMessage = error
+                    }
                 }
-            } catch {
-                testResult = "❌ Test failed: \(error.localizedDescription)"
-                print("Biometric test error: \(error)")
             }
+        }
+    }
+}
+
+struct SecurityInfoRow: View {
+    let text: String
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Text("•")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.secondary)
+            
+            Text(text)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
