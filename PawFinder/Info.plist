@@ -6,5 +6,7 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>NSFaceIDUsageDescription</key>
+	<string>PawFinder uses Face ID to provide secure and convenient access to your account.</string>
 </dict>
 </plist>
