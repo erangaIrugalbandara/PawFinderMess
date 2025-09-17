@@ -554,6 +554,7 @@ struct ReportLostPetView: View {
 
             let lostPet = LostPet(
                 id: UUID().uuidString,
+                ownerId: FirebaseAuth.Auth.auth().currentUser?.uid ?? "unknown_user", // ✅ Added missing ownerId parameter
                 name: petName,
                 breed: breed,
                 species: selectedSpecies,
@@ -579,9 +580,7 @@ struct ReportLostPetView: View {
                     
                     try await FirebaseService().submitLostPetReport(report: lostPet)
                     
-                    try await db.collection("lostPets").document(lostPet.id).updateData([
-                        "ownerID": FirebaseAuth.Auth.auth().currentUser?.uid ?? "unknown"
-                    ])
+                    // No need to update ownerId separately since it's already included in the LostPet model
                     
                     DispatchQueue.main.async {
                         showingMapPicker = false

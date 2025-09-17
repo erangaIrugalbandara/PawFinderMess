@@ -3,6 +3,7 @@ import CoreLocation
 
 struct LostPet: Identifiable, Codable {
     let id: String
+    let ownerId: String // Make sure this field exists for user association
     let name: String
     let breed: String
     let species: PetSpecies

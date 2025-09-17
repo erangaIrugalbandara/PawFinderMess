@@ -1,5 +1,6 @@
 import SwiftUI
 import MapKit
+import FirebaseAuth
 
 struct SightingReportView: View {
     let pet: LostPet
@@ -16,6 +17,10 @@ struct SightingReportView: View {
     @State private var showingMapPicker = false
     @State private var showingSuccessNotification = false
     @State private var isSubmitting = false
+    @State private var errorMessage: String?
+    
+    // Add FirebaseService for saving sightings
+    private let firebaseService = FirebaseService()
     
     var body: some View {
         NavigationView {
@@ -26,6 +31,16 @@ struct SightingReportView: View {
                     
                     // Sighting Form
                     sightingForm
+                    
+                    // Error Message
+                    if let errorMessage = errorMessage {
+                        Text("Error: \(errorMessage)")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.red)
+                            .padding()
+                            .background(Color.red.opacity(0.1))
+                            .cornerRadius(8)
+                    }
                     
                     // Submit Button
                     submitButton
@@ -230,33 +245,75 @@ struct SightingReportView: View {
     }
     
     private func submitSighting() {
+        print("🔄 Starting sighting submission...")
         isSubmitting = true
+        errorMessage = nil
         
-        // Simulate API call delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            // Report sighting to backend
-            viewModel.reportSighting(for: pet)
-            
-            // Schedule phone notification
-            notificationManager.scheduleThankYouNotification(petName: pet.name)
-            
-            // Schedule follow-up hero notification
-            notificationManager.scheduleDelayedHeroNotification(petName: pet.name)
-            
-            isSubmitting = false
-            
-            // Show quick in-app confirmation
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                showingSuccessNotification = true
-            }
-            
-            // Auto-dismiss after 3 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    showingSuccessNotification = false
+        // Create the sighting object
+        let sighting = PetSighting(
+            id: UUID().uuidString,
+            petId: pet.id,
+            reporterId: Auth.auth().currentUser?.uid ?? "anonymous_user",
+            reporterName: reporterName,
+            reporterContact: reporterContact,
+            location: LocationData(
+                latitude: selectedCoordinate?.latitude ?? 0.0,
+                longitude: selectedCoordinate?.longitude ?? 0.0,
+                address: sightingLocation,
+                city: "Unknown",
+                state: "Unknown"
+            ),
+            sightingDate: sightingDate,
+            description: sightingDescription.isEmpty ? "No additional details provided" : sightingDescription,
+            confidence: .medium, // Default confidence level
+            photos: [], // No photo support in current UI, but could be added
+            isVerified: false
+        )
+        
+        print("🐾 Created sighting object for pet: \(pet.name)")
+        print("📍 Location: \(sightingLocation)")
+        print("👤 Reporter: \(reporterName)")
+        
+        // Submit to Firebase
+        Task {
+            do {
+                try await firebaseService.submitSightingReport(sighting: sighting)
+                print("✅ Sighting successfully saved to Firebase!")
+                
+                await MainActor.run {
+                    // Report sighting to SearchNearbyViewModel for any local updates
+                    viewModel.reportSighting(for: pet)
+                    
+                    // Schedule phone notification
+                    notificationManager.scheduleThankYouNotification(petName: pet.name)
+                    
+                    // Schedule follow-up hero notification
+                    notificationManager.scheduleDelayedHeroNotification(petName: pet.name)
+                    
+                    isSubmitting = false
+                    
+                    // Show quick in-app confirmation
+                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                        showingSuccessNotification = true
+                    }
+                    
+                    // Auto-dismiss after 3 seconds
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showingSuccessNotification = false
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            dismiss()
+                        }
+                    }
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    dismiss()
+                
+            } catch {
+                print("❌ Error saving sighting: \(error.localizedDescription)")
+                
+                await MainActor.run {
+                    isSubmitting = false
+                    errorMessage = "Failed to submit sighting. Please try again."
                 }
             }
         }
@@ -289,7 +346,7 @@ struct QuickSuccessView: View {
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.primary)
                 
-                Text("Thank you for helping \(petName)!\nCheck your notifications for more details.")
+                Text("Thank you for helping \(petName)!\nYour sighting has been saved and the owner will be notified.")
                     .font(.system(size: 16))
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)

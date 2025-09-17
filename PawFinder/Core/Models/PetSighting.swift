@@ -4,6 +4,7 @@ import CoreLocation
 struct PetSighting: Identifiable, Codable {
     let id: String
     let petId: String
+    let reporterId: String // Make sure this field exists for user association
     let reporterName: String
     let reporterContact: String
     let location: LocationData

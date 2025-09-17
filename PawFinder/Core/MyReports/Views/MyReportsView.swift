@@ -31,9 +31,17 @@ struct MyReportsView: View {
                             }
                         }
                         Spacer()
+                        
+                        // Refresh Button
+                        Button(action: { refreshData() }) {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.white)
+                        }
+                        .disabled(viewModel.isLoading)
                     }
                     .padding(.top, 30)
-                    .padding(.leading, 16)
+                    .padding(.horizontal, 16)
 
                     // Header
                     VStack(spacing: 8) {
@@ -70,12 +78,32 @@ struct MyReportsView: View {
                     .cornerRadius(24)
                     .padding(.horizontal, 32)
 
+                    // Error Message
+                    if let errorMessage = viewModel.errorMessage {
+                        VStack {
+                            Text("⚠️ \(errorMessage)")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.white)
+                                .multilineTextAlignment(.center)
+                                .padding()
+                                .background(Color.red.opacity(0.3))
+                                .cornerRadius(12)
+                        }
+                        .padding(.horizontal, 20)
+                    }
+
                     // Content Section
                     if viewModel.isLoading {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .scaleEffect(1.5)
-                            .padding(.top, 50)
+                        VStack {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .scaleEffect(1.5)
+                            Text("Loading your reports...")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.white.opacity(0.8))
+                                .padding(.top, 8)
+                        }
+                        .padding(.top, 50)
                     } else {
                         VStack(spacing: 16) {
                             if selectedTab == .lostPets {
@@ -88,12 +116,13 @@ struct MyReportsView: View {
                     }
                 }
             }
+            .refreshable {
+                await refreshDataAsync()
+            }
         }
         .navigationBarHidden(true)
         .task {
-            if let userId = authViewModel.currentUser?.id {
-                await viewModel.loadUserData(userId: userId)
-            }
+            await loadInitialData()
         }
         .alert("Report Shared! 🎉", isPresented: $showingShareSuccess) {
             Button("OK") { }
@@ -172,25 +201,67 @@ struct MyReportsView: View {
         .padding(.vertical, 40)
     }
     
-    // MARK: - Share Functions
-    private func shareReport(pet: LostPet) {
-        // Simulate sharing functionality
-        let shareText = "🆘 MISSING PET ALERT 🆘\n\nName: \(pet.name)\nBreed: \(pet.breed)\nLast seen: \(pet.lastSeenLocation.address)\n\nPlease help us find \(pet.name)! 🙏"
-        
-        let activityVC = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
-        
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first {
-            window.rootViewController?.present(activityVC, animated: true) {
-                showingShareSuccess = true
-            }
+    // MARK: - Data Loading Functions
+    private func loadInitialData() async {
+        guard let userId = authViewModel.currentUser?.id else {
+            return
+        }
+        await viewModel.loadUserData(userId: userId)
+    }
+    
+    private func refreshData() {
+        Task {
+            await refreshDataAsync()
         }
     }
     
-    private func shareSighting(sighting: PetSighting) {
-        let shareText = "🐾 PET SIGHTING REPORT 🐾\n\nSighted: \(DateFormatter.shortDate.string(from: sighting.sightingDate))\nLocation: \(sighting.location.address)\nDescription: \(sighting.description)\n\nHelping reunite pets with their families! 💕"
+    private func refreshDataAsync() async {
+        guard let userId = authViewModel.currentUser?.id else {
+            return
+        }
+        await viewModel.refreshData(userId: userId)
+    }
+    
+    // MARK: - Share Functions
+    private func shareReport(pet: LostPet) {
+        let shareText = """
+        🆘 MISSING PET ALERT 🆘
         
-        let activityVC = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
+        Name: \(pet.name)
+        Breed: \(pet.breed)
+        Color: \(pet.color)
+        Size: \(pet.size.rawValue)
+        Last seen: \(pet.lastSeenLocation.address)
+        Date missing: \(DateFormatter.shortDate.string(from: pet.lastSeenDate))
+        
+        Description: \(pet.description)
+        
+        Contact: \(pet.contactInfo.phone)
+        
+        Please help us find \(pet.name)! 🙏 #MissingPet #PawFinder
+        """
+        
+        shareContent(shareText)
+    }
+    
+    private func shareSighting(sighting: PetSighting) {
+        let shareText = """
+        🐾 PET SIGHTING REPORT 🐾
+        
+        Sighted: \(DateFormatter.shortDate.string(from: sighting.sightingDate))
+        Location: \(sighting.location.address)
+        Confidence: \(sighting.confidence.rawValue)
+        
+        Description: \(sighting.description)
+        
+        Helping reunite pets with their families! 💕 #PetSighting #PawFinder
+        """
+        
+        shareContent(shareText)
+    }
+    
+    private func shareContent(_ content: String) {
+        let activityVC = UIActivityViewController(activityItems: [content], applicationActivities: nil)
         
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {

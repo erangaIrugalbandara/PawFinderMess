@@ -4,6 +4,7 @@ struct LostPetReportCard: View {
     let pet: LostPet
     let onShare: () -> Void
     let onMarkAsFound: () -> Void
+    @State private var showingConfirmation = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -22,7 +23,7 @@ struct LostPetReportCard: View {
                                 .foregroundColor(.white.opacity(0.6))
                         )
                 }
-                .frame(width: 60, height: 60)
+                .frame(width: 70, height: 70)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 
                 VStack(alignment: .leading, spacing: 4) {
@@ -33,19 +34,30 @@ struct LostPetReportCard: View {
                         
                         Spacer()
                         
-                        StatusBadge(isActive: pet.isActive)
+                        PetStatusBadge(isActive: pet.isActive)
                     }
                     
                     Text(pet.breed)
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.white.opacity(0.8))
                     
-                    Text("Missing for \(daysMissing) days")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.white.opacity(0.7))
+                    HStack {
+                        Text("Missing for \(daysMissing) \(daysMissing == 1 ? "day" : "days")")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.white.opacity(0.7))
+                        
+                        if let reward = pet.rewardAmount, reward > 0 {
+                            Spacer()
+                            Text("Reward: $\(Int(reward))")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(.green)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.white.opacity(0.9))
+                                .cornerRadius(4)
+                        }
+                    }
                 }
-                
-                Spacer()
             }
             .padding(16)
             
@@ -56,22 +68,29 @@ struct LostPetReportCard: View {
             
             // Stats and Actions
             HStack {
-                // Stats
-                HStack(spacing: 20) {
-                    StatItem(icon: "eye.fill", value: "156", label: "Views")
-                    StatItem(icon: "location.fill", value: "7", label: "Sightings")
+                // Last seen location (truncated)
+                HStack(spacing: 4) {
+                    Image(systemName: "location.fill")
+                        .font(.system(size: 10))
+                        .foregroundColor(.white.opacity(0.6))
+                    
+                    Text(pet.lastSeenLocation.address.truncated(to: 25))
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.white.opacity(0.7))
                 }
                 
                 Spacer()
                 
                 // Actions
-                HStack(spacing: 12) {
+                HStack(spacing: 8) {
                     if pet.isActive {
-                        Button(action: onMarkAsFound) {
+                        Button(action: {
+                            showingConfirmation = true
+                        }) {
                             Text("Mark Found")
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundColor(Color(red: 0.4, green: 0.3, blue: 0.8))
-                                .padding(.horizontal, 12)
+                                .padding(.horizontal, 10)
                                 .padding(.vertical, 6)
                                 .background(Color.white)
                                 .cornerRadius(15)
@@ -80,11 +99,11 @@ struct LostPetReportCard: View {
                     
                     Button(action: onShare) {
                         Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.white)
-                            .frame(width: 32, height: 32)
+                            .frame(width: 28, height: 28)
                             .background(Color.white.opacity(0.2))
-                            .cornerRadius(16)
+                            .cornerRadius(14)
                     }
                 }
             }
@@ -98,24 +117,39 @@ struct LostPetReportCard: View {
             RoundedRectangle(cornerRadius: 16)
                 .stroke(Color.white.opacity(0.2), lineWidth: 1)
         )
+        .alert("Mark as Found?", isPresented: $showingConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Yes, Found!", role: .destructive) {
+                onMarkAsFound()
+            }
+        } message: {
+            Text("Are you sure \(pet.name) has been found? This will mark the report as inactive.")
+        }
     }
     
     private var daysMissing: Int {
-        Calendar.current.dateComponents([.day], from: pet.lastSeenDate, to: Date()).day ?? 0
+        max(1, Calendar.current.dateComponents([.day], from: pet.lastSeenDate, to: Date()).day ?? 1)
     }
 }
 
-struct StatusBadge: View {
+// Renamed to avoid conflicts with any existing StatusBadge
+struct PetStatusBadge: View {
     let isActive: Bool
     
     var body: some View {
-        Text(isActive ? "Missing" : "Found")
-            .font(.system(size: 10, weight: .bold))
-            .foregroundColor(.white)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(isActive ? Color.red : Color.green)
-            .cornerRadius(8)
+        HStack(spacing: 4) {
+            Circle()
+                .fill(isActive ? Color.red : Color.green)
+                .frame(width: 6, height: 6)
+            
+            Text(isActive ? "Missing" : "Found")
+                .font(.system(size: 10, weight: .bold))
+                .foregroundColor(.white)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(isActive ? Color.red.opacity(0.3) : Color.green.opacity(0.3))
+        .cornerRadius(8)
     }
 }
 
@@ -140,3 +174,5 @@ struct StatItem: View {
         }
     }
 }
+
+// No extensions here - they should be in Extensions.swift only

@@ -9,29 +9,44 @@ struct PetDetailView: View {
 
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Photo Carousel
-                    photoCarousel
-
-                    VStack(spacing: 24) {
-                        // Pet Info Header
-                        petInfoHeader
-
-                        // Quick Actions
-                        quickActions
-
-                        // Pet Details
-                        petDetailsSection
-
-                        // Location Section
-                        locationSection
-
-                        // Contact Information
-                        contactSection
+            ZStack {
+                // Modern gradient background
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(red: 0.4, green: 0.3, blue: 0.8),
+                        Color(red: 0.6, green: 0.4, blue: 0.9)
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(spacing: 0) {
+                        // Enhanced Photo Carousel
+                        photoCarousel
+                        
+                        // Main content with modern cards
+                        VStack(spacing: 20) {
+                            // Pet Info Header with glassmorphism
+                            petInfoHeader
+                            
+                            // Quick Actions with enhanced styling
+                            quickActions
+                            
+                            // Pet Details Card
+                            petDetailsSection
+                            
+                            // Location Card
+                            locationSection
+                            
+                            // Contact Information Card
+                            contactSection
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 40)
+                        .offset(y: -20)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 40)
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -40,254 +55,496 @@ struct PetDetailView: View {
                     Button("Close") {
                         dismiss()
                     }
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.white)
                 }
-
+                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
                         sharePet()
                     }) {
-                        Image(systemName: "square.and.arrow.up")
+                        ZStack {
+                            Circle()
+                                .fill(Color.white.opacity(0.2))
+                                .frame(width: 36, height: 36)
+                            
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.white)
+                        }
                     }
                 }
             }
         }
     }
 
-    // MARK: - Photo Carousel
+    // MARK: - Enhanced Photo Carousel
     private var photoCarousel: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 0) {
             if !pet.photos.isEmpty {
-                TabView(selection: $currentPhotoIndex) {
-                    ForEach(0..<pet.photos.count, id: \.self) { index in
-                        AsyncImage(url: URL(string: pet.photos[index])) { image in
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                        } placeholder: {
-                            Rectangle()
-                                .fill(LinearGradient(
-                                    colors: [Color.blue.opacity(0.3), Color.purple.opacity(0.3)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ))
-                            VStack(spacing: 12) {
-                                Image(systemName: pet.species.iconName)
-                                    .font(.system(size: 60))
+                ZStack {
+                    TabView(selection: $currentPhotoIndex) {
+                        ForEach(0..<pet.photos.count, id: \.self) { index in
+                            AsyncImage(url: URL(string: pet.photos[index])) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                            } placeholder: {
+                                ZStack {
+                                    LinearGradient(
+                                        colors: [
+                                            Color(red: 0.4, green: 0.3, blue: 0.8).opacity(0.4),
+                                            Color(red: 0.6, green: 0.4, blue: 0.9).opacity(0.4)
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                    
+                                    VStack(spacing: 12) {
+                                        Image(systemName: pet.species.iconName)
+                                            .font(.system(size: 60))
+                                            .foregroundColor(.white)
+                                        
+                                        Text("Loading photo...")
+                                            .font(.system(size: 16, weight: .medium))
+                                            .foregroundColor(.white.opacity(0.8))
+                                    }
+                                }
+                            }
+                            .frame(height: 320)
+                            .clipped()
+                            .tag(index)
+                        }
+                    }
+                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                    .frame(height: 320)
+                    
+                    // Custom photo indicators with modern styling
+                    if pet.photos.count > 1 {
+                        VStack {
+                            Spacer()
+                            
+                            HStack(spacing: 8) {
+                                ForEach(0..<pet.photos.count, id: \.self) { index in
+                                    Circle()
+                                        .fill(index == currentPhotoIndex ? Color.white : Color.white.opacity(0.5))
+                                        .frame(width: 8, height: 8)
+                                        .scaleEffect(index == currentPhotoIndex ? 1.2 : 1.0)
+                                        .animation(.easeInOut(duration: 0.2), value: currentPhotoIndex)
+                                }
+                            }
+                            .padding(.bottom, 20)
+                        }
+                    }
+                    
+                    // Status overlay
+                    VStack {
+                        HStack {
+                            Spacer()
+                            
+                            VStack(spacing: 8) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.red)
+                                        .frame(width: 20, height: 20)
+                                        .shadow(color: Color.red.opacity(0.4), radius: 4, x: 0, y: 2)
+                                }
+                                
+                                Text("MISSING")
+                                    .font(.system(size: 12, weight: .black))
                                     .foregroundColor(.white)
-                                Text("Loading...")
-                                    .font(.system(size: 14, weight: .medium))
-                                    .foregroundColor(.white.opacity(0.8))
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Color.red)
+                                            .shadow(color: Color.red.opacity(0.4), radius: 6, x: 0, y: 3)
+                                    )
                             }
                         }
-                        .frame(height: 300)
-                        .cornerRadius(16)
-                        .clipped()
-                        .tag(index)
+                        Spacer()
                     }
+                    .padding(20)
                 }
-                .tabViewStyle(PageTabViewStyle())
-                .frame(height: 300)
             } else {
-                // Placeholder when no photos
-                Rectangle()
-                    .fill(LinearGradient(
-                        colors: [Color.blue.opacity(0.3), Color.purple.opacity(0.3)],
+                // Enhanced placeholder when no photos
+                ZStack {
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.4, green: 0.3, blue: 0.8).opacity(0.6),
+                            Color(red: 0.6, green: 0.4, blue: 0.9).opacity(0.6)
+                        ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
-                    ))
-                    .frame(height: 300)
-                    .cornerRadius(16)
-                    .overlay(
-                        VStack(spacing: 12) {
-                            Image(systemName: pet.species.iconName)
-                                .font(.system(size: 60))
-                                .foregroundColor(.white)
-                            Text("No photos available")
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(.white.opacity(0.8))
-                        }
                     )
-            }
-
-            // Photo indicators
-            if pet.photos.count > 1 {
-                HStack(spacing: 8) {
-                    ForEach(0..<pet.photos.count, id: \.self) { index in
-                        Circle()
-                            .fill(index == currentPhotoIndex ? Color.blue : Color.gray.opacity(0.5))
-                            .frame(width: 8, height: 8)
+                    
+                    VStack(spacing: 16) {
+                        Image(systemName: pet.species.iconName)
+                            .font(.system(size: 80))
+                            .foregroundColor(.white)
+                        
+                        Text("No photos available")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
                     }
                 }
+                .frame(height: 320)
             }
         }
     }
 
-    // MARK: - Pet Info Header
+    // MARK: - Pet Info Header with Glassmorphism
     private var petInfoHeader: some View {
-        VStack(spacing: 16) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
+        VStack(spacing: 20) {
+            HStack(alignment: .top, spacing: 16) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text(pet.name)
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.primary)
-
+                        .font(.system(size: 32, weight: .bold))
+                        .foregroundColor(.white)
+                    
                     Text("\(pet.breed) • \(pet.age) years old")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.9))
+                    
+                    HStack(spacing: 12) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "location.fill")
+                                .font(.system(size: 14))
+                                .foregroundColor(.white.opacity(0.8))
+                            
+                            Text(distanceString(for: pet))
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.white)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.white.opacity(0.2))
+                        )
+                        
+                        if let rewardAmount = pet.rewardAmount, rewardAmount > 0 {
+                            HStack(spacing: 6) {
+                                Image(systemName: "dollarsign.circle.fill")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.white)
+                                
+                                Text("$\(Int(rewardAmount))")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.green.opacity(0.3))
+                            )
+                        }
+                    }
                 }
-
+                
                 Spacer()
-
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text(pet.species.emoji)
-                        .font(.system(size: 40))
-
-                    Text(distanceString(for: pet))
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.blue)
-                }
+                
+                Text(pet.species.emoji)
+                    .font(.system(size: 50))
+                    .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
             }
         }
+        .padding(24)
+        .background(
+            RoundedRectangle(cornerRadius: 24)
+                .fill(Color.white.opacity(0.15))
+                .background(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                )
+        )
     }
 
-    // MARK: - Quick Actions
+    // MARK: - Enhanced Quick Actions
     private var quickActions: some View {
         HStack(spacing: 16) {
             Button(action: {
                 viewModel.showSightingReport(for: pet)
             }) {
-                HStack(spacing: 8) {
-                    Image(systemName: "eye.fill")
-                        .font(.system(size: 16))
+                HStack(spacing: 10) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.white.opacity(0.2))
+                            .frame(width: 32, height: 32)
+                        
+                        Image(systemName: "eye.fill")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                    
                     Text("Report Sighting")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
                 }
-                .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
-                .frame(height: 48)
+                .frame(height: 56)
                 .background(
-                    LinearGradient(
-                        colors: [Color.blue, Color.blue.opacity(0.8)],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.blue, Color.blue.opacity(0.8)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .shadow(color: Color.blue.opacity(0.4), radius: 8, x: 0, y: 4)
                 )
-                .cornerRadius(12)
             }
             
             Button(action: {
                 callOwner()
             }) {
-                HStack(spacing: 8) {
-                    Image(systemName: "phone.fill")
-                        .font(.system(size: 16))
+                HStack(spacing: 10) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.green.opacity(0.2))
+                            .frame(width: 32, height: 32)
+                        
+                        Image(systemName: "phone.fill")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.green)
+                    }
+                    
                     Text("Call Owner")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.green)
                 }
-                .foregroundColor(.blue)
                 .frame(maxWidth: .infinity)
-                .frame(height: 48)
-                .background(Color.blue.opacity(0.1))
-                .cornerRadius(12)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.blue, lineWidth: 1)
+                .frame(height: 56)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.white)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.green, lineWidth: 2)
+                        )
+                        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
                 )
             }
         }
     }
 
     private func callOwner() {
-        if let url = URL(string: "tel://\(pet.contactInfo)") {
+        if let url = URL(string: "tel://\(pet.contactInfo.phone)") {
             UIApplication.shared.open(url)
         }
     }
 
-    // MARK: - Pet Details Section
+    // MARK: - Modern Pet Details Section
     private var petDetailsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Pet Details")
-                .font(.system(size: 20, weight: .bold))
-                .foregroundColor(.primary)
-
-            VStack(spacing: 12) {
-                DetailRow(title: "Description", value: pet.description)
-                DetailRow(title: "Color", value: pet.color)
-                DetailRow(title: "Size", value: pet.size.rawValue)
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(Color.orange.opacity(0.2))
+                        .frame(width: 40, height: 40)
+                    
+                    Image(systemName: "info.circle.fill")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.orange)
+                }
+                
+                Text("Pet Details")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(.primary)
+                
+                Spacer()
+            }
+            
+            VStack(spacing: 16) {
+                ModernDetailRow(title: "Description", value: pet.description, icon: "text.alignleft")
+                ModernDetailRow(title: "Color", value: pet.color, icon: "paintpalette.fill")
+                ModernDetailRow(title: "Size", value: pet.size.rawValue, icon: "ruler.fill")
 
                 if let rewardAmount = pet.rewardAmount, rewardAmount > 0 {
-                    DetailRow(title: "Reward", value: "$\(Int(rewardAmount))")
+                    ModernDetailRow(title: "Reward", value: "$\(Int(rewardAmount))", icon: "dollarsign.circle.fill")
                 }
 
                 if !pet.distinctiveFeatures.isEmpty {
-                    DetailRow(title: "Distinctive Features", value: pet.distinctiveFeatures.joined(separator: ", "))
+                    ModernDetailRow(title: "Distinctive Features", value: pet.distinctiveFeatures.joined(separator: ", "), icon: "star.fill")
                 }
             }
         }
-        .padding(20)
-        .background(Color(UIColor.systemGray6))
-        .cornerRadius(16)
+        .padding(24)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 4)
+        )
     }
 
-    // MARK: - Location Section
+    // MARK: - Modern Location Section
     private var locationSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Last Seen Location")
-                .font(.system(size: 20, weight: .bold))
-                .foregroundColor(.primary)
-
-            VStack(alignment: .leading, spacing: 8) {
-                Text(pet.lastSeenLocation.address)
-                    .font(.system(size: 16, weight: .medium))
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(Color.red.opacity(0.2))
+                        .frame(width: 40, height: 40)
+                    
+                    Image(systemName: "location.fill")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.red)
+                }
+                
+                Text("Last Seen Location")
+                    .font(.system(size: 22, weight: .bold))
                     .foregroundColor(.primary)
-
-                Text("Last seen: \(pet.lastSeenDate, formatter: dateFormatter)")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.secondary)
+                
+                Spacer()
             }
 
-            // Mini Map
-            Map(coordinateRegion: .constant(MKCoordinateRegion(
-                center: pet.coordinate,
-                span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
-            )), annotationItems: [pet]) { pet in
-                MapPin(coordinate: pet.coordinate, tint: .red)
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 12) {
+                    Image(systemName: "mappin.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(.red)
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(pet.lastSeenLocation.address)
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.primary)
+                        
+                        Text("Last seen: \(pet.lastSeenDate, formatter: dateFormatter)")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Spacer()
+                }
+                .padding(16)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.red.opacity(0.05))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.red.opacity(0.2), lineWidth: 1)
+                        )
+                )
             }
-            .frame(height: 150)
-            .cornerRadius(12)
-            .disabled(true)
+
+            // Enhanced Mini Map
+            ZStack {
+                Map(coordinateRegion: .constant(MKCoordinateRegion(
+                    center: pet.coordinate,
+                    span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+                )), annotationItems: [pet]) { pet in
+                    MapPin(coordinate: pet.coordinate, tint: .red)
+                }
+                .frame(height: 180)
+                .cornerRadius(16)
+                .disabled(true)
+                
+                // Map overlay with directions button
+                VStack {
+                    Spacer()
+                    
+                    HStack {
+                        Spacer()
+                        
+                        Button(action: {
+                            openInMaps()
+                        }) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
+                                    .font(.system(size: 14, weight: .bold))
+                                
+                                Text("Directions")
+                                    .font(.system(size: 14, weight: .bold))
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color.blue)
+                                    .shadow(color: Color.blue.opacity(0.4), radius: 6, x: 0, y: 3)
+                            )
+                        }
+                    }
+                    .padding(16)
+                }
+            }
         }
-        .padding(20)
-        .background(Color(UIColor.systemGray6))
-        .cornerRadius(16)
+        .padding(24)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 4)
+        )
     }
 
-    // MARK: - Contact Section
+    // MARK: - Modern Contact Section
     private var contactSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Contact Owner")
-                .font(.system(size: 20, weight: .bold))
-                .foregroundColor(.primary)
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(Color.green.opacity(0.2))
+                        .frame(width: 40, height: 40)
+                    
+                    Image(systemName: "person.circle.fill")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.green)
+                }
+                
+                Text("Contact Owner")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(.primary)
+                
+                Spacer()
+            }
 
-            VStack(spacing: 12) {
-                DetailRow(title: "Owner", value: pet.ownerName)
-                DetailRow(title: "Phone", value: pet.contactInfo.phone)
+            VStack(spacing: 16) {
+                ModernDetailRow(title: "Owner", value: pet.ownerName, icon: "person.fill")
+                ModernDetailRow(title: "Phone", value: pet.contactInfo.phone, icon: "phone.fill")
 
                 if !pet.contactInfo.email.isEmpty {
-                    DetailRow(title: "Email", value: pet.contactInfo.email)
+                    ModernDetailRow(title: "Email", value: pet.contactInfo.email, icon: "envelope.fill")
                 }
 
-                DetailRow(title: "Preferred Contact", value: pet.contactInfo.preferredContactMethod.rawValue)
+                ModernDetailRow(title: "Preferred Contact", value: pet.contactInfo.preferredContactMethod.rawValue, icon: "text.bubble.fill")
             }
+            
+            // Emergency contact note
+            HStack(spacing: 12) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 16))
+                    .foregroundColor(.orange)
+                
+                Text("Please contact immediately if you see this pet. Every moment counts!")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.leading)
+                
+                Spacer()
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.orange.opacity(0.05))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.orange.opacity(0.2), lineWidth: 1)
+                    )
+            )
         }
-        .padding(20)
-        .background(Color(UIColor.systemGray6))
-        .cornerRadius(16)
+        .padding(24)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 4)
+        )
     }
 
     // MARK: - Helper Functions
     private func distanceString(for pet: LostPet) -> String {
-        // Use the existing distanceFromUser property if available
         if let distance = pet.distanceFromUser, distance > 0 {
             if distance < 0.1 {
                 return "Nearby"
@@ -298,10 +555,9 @@ struct PetDetailView: View {
             }
         }
 
-        // Calculate distance if user location is available
         if let userLocation = viewModel.userLocation {
             let petLocation = CLLocation(latitude: pet.coordinate.latitude, longitude: pet.coordinate.longitude)
-            let distance = userLocation.distance(from: petLocation) / 1609.34 // Convert to miles
+            let distance = userLocation.distance(from: petLocation) / 1609.34
 
             if distance < 0.1 {
                 return "Nearby"
@@ -315,8 +571,15 @@ struct PetDetailView: View {
         return "Distance unknown"
     }
 
+    private func openInMaps() {
+        let coordinate = pet.coordinate
+        let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: coordinate))
+        mapItem.name = "Last seen location for \(pet.name)"
+        mapItem.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving])
+    }
+
     private func sharePet() {
-        let shareText = "Help find \(pet.name)! This \(pet.breed) was last seen at \(pet.lastSeenLocation.address). Contact: \(pet.contactInfo.phone)"
+        let shareText = "🐾 Help find \(pet.name)! This \(pet.breed) was last seen at \(pet.lastSeenLocation.address). Contact: \(pet.contactInfo.phone) #FindMyPet #PawFinder"
         let activityVC = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
 
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
@@ -333,24 +596,37 @@ struct PetDetailView: View {
     }
 }
 
-// MARK: - Detail Row Component
-struct DetailRow: View {
+// MARK: - Modern Detail Row Component
+struct ModernDetailRow: View {
     let title: String
     let value: String
+    let icon: String
 
     var body: some View {
-        HStack {
-            Text(title)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.secondary)
-                .frame(width: 100, alignment: .leading)
-
-            Text(value)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.primary)
+        HStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(Color.blue.opacity(0.1))
+                    .frame(width: 36, height: 36)
+                
+                Image(systemName: icon)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(.blue)
+            }
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.secondary)
+                
+                Text(value)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.primary)
+            }
 
             Spacer()
         }
+        .padding(.vertical, 8)
     }
 }
 
@@ -358,12 +634,13 @@ struct DetailRow: View {
     PetDetailView(
         pet: LostPet(
             id: "1",
+            ownerId: "preview_owner_123", // ✅ Added missing ownerId parameter
             name: "Buddy",
             breed: "Golden Retriever",
-            species: PetSpecies.dog, // Use explicit type
+            species: PetSpecies.dog,
             age: 3,
             color: "Golden",
-            size: PetSize.large, // Use explicit type
+            size: PetSize.large,
             description: "Friendly golden retriever",
             lastSeenLocation: LocationData(
                 latitude: 37.7749,
@@ -376,7 +653,7 @@ struct DetailRow: View {
             contactInfo: ContactInfo(
                 phone: "(555) 123-4567",
                 email: "owner@email.com",
-                preferredContactMethod: ContactMethod.phone // Use explicit type
+                preferredContactMethod: ContactMethod.phone
             ),
             ownerName: "John Doe",
             photos: [],

@@ -75,8 +75,40 @@ class SearchNearbyViewModel: NSObject, ObservableObject {
 
     func reportSighting(for pet: LostPet) {
         print("🎯 Sighting reported for pet: \(pet.name)")
-        // Here you would typically send the sighting data to your backend
-        // The success notification is now handled within SightingReportView
+        
+        // This method is now mainly for local state updates and notifications
+        // The actual Firebase saving is handled by SightingReportView
+        
+        // You could add local analytics tracking here
+        // or update local pet statistics
+        
+        // Optional: Trigger a refresh of the pets list to get updated sighting counts
+        Task {
+            await refreshPetsData()
+        }
+    }
+    
+    // MARK: - Enhanced Sighting Methods
+    
+    /// Submit a sighting with full data to Firebase
+    func submitSightingToFirebase(_ sighting: PetSighting) async throws {
+        try await firebaseService.submitSightingReport(sighting: sighting)
+        print("✅ Sighting successfully submitted to Firebase")
+        
+        // Optional: Update local pet data with new sighting count
+        await updateLocalPetSightingCount(petId: sighting.petId)
+    }
+    
+    /// Update local pet sighting count after a new sighting is reported
+    private func updateLocalPetSightingCount(petId: String) async {
+        // This is optional - you could fetch updated pet data or increment locally
+        print("🔄 Updating local sighting count for pet: \(petId)")
+    }
+    
+    /// Refresh pets data from Firebase
+    func refreshPetsData() async {
+        print("🔄 Refreshing pets data...")
+        loadPetsFromDatabase()
     }
 
     // MARK: - Data Loading
@@ -121,6 +153,7 @@ class SearchNearbyViewModel: NSObject, ObservableObject {
         let samplePets = [
             LostPet(
                 id: "sample-1",
+                ownerId: "sample_owner_1",
                 name: "Max",
                 breed: "Golden Retriever",
                 species: .dog,
@@ -151,6 +184,7 @@ class SearchNearbyViewModel: NSObject, ObservableObject {
             ),
             LostPet(
                 id: "sample-2",
+                ownerId: "sample_owner_2",
                 name: "Luna",
                 breed: "Husky",
                 species: .dog,
