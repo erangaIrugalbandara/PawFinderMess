@@ -2,6 +2,8 @@ import SwiftUI
 
 struct DashboardView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
+    @StateObject private var dashboardViewModel = DashboardViewModel()
+    @StateObject private var profileViewModel = ProfileViewModel() // Add ProfileViewModel to track profile changes
     @State private var showingReportView = false
     @State private var showingSearchView = false
     @State private var showingMyReportsView = false
@@ -26,15 +28,15 @@ struct DashboardView: View {
                     // Header Section
                     headerSection
                     
-                    // Main Content (Fixed Layout)
+                    // Main Content (Dynamic Layout)
                     VStack(spacing: 32) {
-                        // Stats Cards
+                        // Stats Cards with real data
                         statsSection
                         
                         // Quick Actions Grid
                         quickActionsSection
                         
-                        // Recent Activity Preview
+                        // Recent Activity Preview with real data
                         recentActivityPreview
                         
                         Spacer()
@@ -45,7 +47,6 @@ struct DashboardView: View {
             }
         }
         .navigationBarHidden(true)
-        // Replace .sheet with .fullScreenCover for full-screen presentation
         .fullScreenCover(isPresented: $showingReportView) {
             ReportLostPetView()
                 .environmentObject(authViewModel)
@@ -61,18 +62,36 @@ struct DashboardView: View {
         .fullScreenCover(isPresented: $showingProfileView) {
             ProfileView()
                 .environmentObject(authViewModel)
+                .environmentObject(profileViewModel) // Pass profileViewModel
         }
         .fullScreenCover(isPresented: $showingCommunityUpdatesView) {
             CommunityUpdatesView()
                 .environmentObject(authViewModel)
         }
-        .fullScreenCover(isPresented: $showingProfileView) {
-            ProfileView()
-                .environmentObject(authViewModel) // 🔥 ADD THIS LINE
+        .task {
+            // Load dashboard data when view appears
+            await dashboardViewModel.loadDashboardData()
+            // Load profile data to get latest profile picture
+            profileViewModel.fetchProfile()
+        }
+        .refreshable {
+            // Pull to refresh functionality
+            await dashboardViewModel.refreshData()
+            profileViewModel.fetchProfile() // Refresh profile data too
+        }
+        .onChange(of: showingProfileView) { isShowing in
+            // When profile view is dismissed, refresh profile data
+            if !isShowing {
+                profileViewModel.fetchProfile()
+                // Also refresh auth user data
+                Task {
+                    await authViewModel.refreshCurrentUser()
+                }
+            }
         }
     }
     
-    // MARK: - Header Section
+    // MARK: - Header Section with Updated Profile Picture
     private var headerSection: some View {
         HStack {
             VStack(alignment: .leading, spacing: 8) {
@@ -80,7 +99,7 @@ struct DashboardView: View {
                     .font(.system(size: 32, weight: .bold))
                     .foregroundColor(.white)
                 
-                // Only show the time-based greeting (should show "Good afternoon! ☀️" at 12:05 UTC)
+                // Time-based greeting
                 Text(currentTimeGreeting())
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.white.opacity(0.9))
@@ -88,7 +107,7 @@ struct DashboardView: View {
             
             Spacer()
             
-            // Profile Button
+            // Enhanced Profile Button with actual profile picture
             Button(action: {
                 showingProfileView = true
             }) {
@@ -97,38 +116,68 @@ struct DashboardView: View {
                         .fill(Color.white.opacity(0.2))
                         .frame(width: 50, height: 50)
                     
-                    Image(systemName: "person.circle.fill")
-                        .font(.system(size: 26))
-                        .foregroundColor(.white)
+                    if dashboardViewModel.isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .scaleEffect(0.8)
+                    } else {
+                        // Try to show profile image, fallback to icon
+                        if !profileViewModel.profileImageURL.isEmpty {
+                            let profileImageURL = profileViewModel.profileImageURL
+                            AsyncImage(url: URL(string: profileImageURL)) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                            } placeholder: {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                    .scaleEffect(0.6)
+                            }
+                            .frame(width: 46, height: 46)
+                            .clipShape(Circle())
+                        } else {
+                            // Fallback to default icon
+                            Image(systemName: "person.circle.fill")
+                                .font(.system(size: 26))
+                                .foregroundColor(.white)
+                        }
+                    }
                 }
+                .overlay(
+                    Circle()
+                        .stroke(Color.white.opacity(0.3), lineWidth: 2)
+                        .frame(width: 50, height: 50)
+                )
             }
         }
         .padding(.horizontal, 24)
         .padding(.top, 20)
     }
     
-    // MARK: - Stats Section
+    // MARK: - Stats Section with Real Data
     private var statsSection: some View {
         HStack(spacing: 16) {
             DashboardStatCard(
-                number: "12",
+                number: dashboardViewModel.dashboardStats.missing,
                 title: "Missing",
                 subtitle: "Active Cases",
                 color: .red
             )
             DashboardStatCard(
-                number: "28",
+                number: dashboardViewModel.dashboardStats.reports,
                 title: "Reports",
                 subtitle: "This Week",
                 color: .orange
             )
             DashboardStatCard(
-                number: "156",
+                number: dashboardViewModel.dashboardStats.reunited,
                 title: "Reunited",
                 subtitle: "Success Stories",
                 color: .green
             )
         }
+        .opacity(dashboardViewModel.isLoading ? 0.6 : 1.0)
+        .animation(.easeInOut(duration: 0.3), value: dashboardViewModel.isLoading)
     }
     
     // MARK: - Quick Actions Section
@@ -159,7 +208,7 @@ struct DashboardView: View {
                 
                 // Search Nearby
                 DashboardActionCard(
-                    icon: "magnifyingglass.circle.fill",
+                    icon: "magnifyinglass.circle.fill",
                     iconColor: .blue,
                     title: "Search",
                     subtitle: "Nearby",
@@ -196,25 +245,69 @@ struct DashboardView: View {
         }
     }
     
-    // MARK: - Recent Activity Preview (Non-scrollable)
+    // MARK: - Recent Activity Preview with Real Data
     private var recentActivityPreview: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text("Recent Activity")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.white)
+                
+                if dashboardViewModel.isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(0.7)
+                }
+                
                 Spacer()
                 
                 Button("View All") {
-                    // Navigate to full activity view
+                    showingCommunityUpdatesView = true
                 }
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(.white.opacity(0.8))
             }
             
-            // Show only the most recent activity (no scrolling)
-            if let recentActivity = sampleRecentActivities.first {
-                CompactActivityCard(activity: recentActivity)
+            // Show most recent activity or empty state
+            if let mostRecentActivity = dashboardViewModel.mostRecentActivity {
+                CompactActivityCard(activity: mostRecentActivity)
+            } else if !dashboardViewModel.isLoading {
+                // Empty state
+                VStack(spacing: 12) {
+                    Image(systemName: "pawprint")
+                        .font(.system(size: 32))
+                        .foregroundColor(.white.opacity(0.6))
+                    
+                    Text("No recent activity")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.white.opacity(0.8))
+                    
+                    Text("When pets are reported or found, they'll appear here")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.white.opacity(0.6))
+                        .multilineTextAlignment(.center)
+                }
+                .padding(20)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.white.opacity(0.1))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        )
+                )
+            }
+            
+            // Error message if needed
+            if let errorMessage = dashboardViewModel.errorMessage {
+                Text("⚠️ \(errorMessage)")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.white.opacity(0.9))
+                    .padding(12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.red.opacity(0.3))
+                    )
             }
         }
     }
@@ -233,35 +326,9 @@ struct DashboardView: View {
             return "Good night! 🌙"
         }
     }
-    
-    // MARK: - Sample Data
-    private var sampleRecentActivities: [DashboardRecentActivity] {
-        [
-            DashboardRecentActivity(
-                id: UUID(),
-                petName: "Buddy",
-                action: "was reported missing",
-                location: "Downtown Park",
-                distance: "0.8 miles away",
-                time: "2 hours ago",
-                petType: .dog,
-                status: .missing
-            ),
-            DashboardRecentActivity(
-                id: UUID(),
-                petName: "Whiskers",
-                action: "was found safe!",
-                location: "Oak Street",
-                distance: "1.2 miles away",
-                time: "4 hours ago",
-                petType: .cat,
-                status: .found
-            )
-        ]
-    }
 }
 
-// MARK: - Compact Activity Card (for fixed layout)
+// MARK: - Compact Activity Card (Enhanced for Real Data)
 struct CompactActivityCard: View {
     let activity: DashboardRecentActivity
     
@@ -297,7 +364,7 @@ struct CompactActivityCard: View {
                     .foregroundColor(.gray)
                 
                 HStack {
-                    Text(activity.location)
+                    Text(activity.location.truncated(to: 30))
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(.blue)
                     
@@ -323,10 +390,11 @@ struct CompactActivityCard: View {
     }
 }
 
-// MARK: - Community Updates View (Full Screen with iOS Back Button)
+// MARK: - Community Updates View (Enhanced with Real Data)
 struct CommunityUpdatesView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var authViewModel: AuthViewModel
+    @StateObject private var dashboardViewModel = DashboardViewModel()
     
     var body: some View {
         NavigationView {
@@ -343,17 +411,79 @@ struct CommunityUpdatesView: View {
                 
                 ScrollView {
                     VStack(spacing: 24) {
-                        // Updates List
-                        VStack(spacing: 16) {
-                            ForEach(sampleCommunityUpdates, id: \.id) { update in
-                                CommunityUpdateCard(update: update)
+                        // Recent Activities Section
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Recent Pet Activity")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 20)
+                            
+                            if dashboardViewModel.recentActivities.isEmpty && !dashboardViewModel.isLoading {
+                                // Empty state
+                                VStack(spacing: 16) {
+                                    Image(systemName: "pawprint")
+                                        .font(.system(size: 48))
+                                        .foregroundColor(.white.opacity(0.6))
+                                    
+                                    Text("No recent activity")
+                                        .font(.system(size: 18, weight: .medium))
+                                        .foregroundColor(.white.opacity(0.8))
+                                    
+                                    Text("Check back later for updates on lost and found pets")
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(.white.opacity(0.6))
+                                        .multilineTextAlignment(.center)
+                                }
+                                .padding(40)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .fill(Color.white.opacity(0.1))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 20)
+                                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                        )
+                                )
+                                .padding(.horizontal, 20)
+                            } else {
+                                ForEach(dashboardViewModel.recentActivities) { activity in
+                                    EnhancedActivityCard(activity: activity)
+                                        .padding(.horizontal, 20)
+                                }
                             }
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 20)
+                        
+                        // Community Updates Section
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Community Updates")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 20)
+                            
+                            ForEach(sampleCommunityUpdates, id: \.id) { update in
+                                CommunityUpdateCard(update: update)
+                                    .padding(.horizontal, 20)
+                            }
+                        }
                         
                         Spacer(minLength: 100)
                     }
+                    .padding(.top, 20)
+                }
+                
+                // Loading overlay
+                if dashboardViewModel.isLoading {
+                    VStack {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .scaleEffect(1.5)
+                        
+                        Text("Loading updates...")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.white.opacity(0.8))
+                            .padding(.top, 16)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.black.opacity(0.3))
                 }
             }
             .navigationTitle("Community Updates")
@@ -373,6 +503,9 @@ struct CommunityUpdatesView: View {
                 }
             }
         }
+        .task {
+            await dashboardViewModel.loadDashboardData()
+        }
     }
     
     private var sampleCommunityUpdates: [DashboardCommunityUpdate] {
@@ -386,8 +519,8 @@ struct CommunityUpdatesView: View {
             ),
             DashboardCommunityUpdate(
                 id: UUID(),
-                title: "Success Story: Luna Reunited!",
-                message: "Thanks to our amazing community, Luna the Golden Retriever is back home after 3 days",
+                title: "Success Story: Pet Reunited!",
+                message: "Thanks to our amazing community, another pet is back home safe with their family",
                 time: "3 hours ago",
                 type: .success
             ),
@@ -397,22 +530,65 @@ struct CommunityUpdatesView: View {
                 message: "Heavy rain expected this evening. Please keep your pets safe indoors and check on outdoor shelters",
                 time: "5 hours ago",
                 type: .weather
-            ),
-            DashboardCommunityUpdate(
-                id: UUID(),
-                title: "Pet Safety Workshop",
-                message: "Join us this Saturday for a free pet safety and identification workshop at the community center",
-                time: "1 day ago",
-                type: .volunteers
-            ),
-            DashboardCommunityUpdate(
-                id: UUID(),
-                title: "Found: Orange Tabby Cat",
-                message: "Friendly orange tabby found near Central Park. Currently at the local vet clinic",
-                time: "2 days ago",
-                type: .success
             )
         ]
+    }
+}
+
+// MARK: - Enhanced Activity Card for Community Updates
+struct EnhancedActivityCard: View {
+    let activity: DashboardRecentActivity
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Header
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(activity.status.backgroundColor)
+                        .frame(width: 50, height: 50)
+                    
+                    Image(systemName: activity.petType.icon)
+                        .font(.system(size: 24))
+                        .foregroundColor(activity.status.color)
+                }
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("\(activity.petName) \(activity.action)")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.black)
+                    
+                    Text(activity.time)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.gray)
+                }
+                
+                Spacer()
+                
+                Circle()
+                    .fill(activity.status.color)
+                    .frame(width: 12, height: 12)
+            }
+            
+            // Location info
+            HStack {
+                Image(systemName: "location.fill")
+                    .font(.system(size: 14))
+                    .foregroundColor(.blue)
+                
+                Text(activity.location)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.gray)
+                
+                Spacer()
+            }
+        }
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white)
+                .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 3)
+        )
     }
 }
 

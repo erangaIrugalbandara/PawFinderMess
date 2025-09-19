@@ -445,9 +445,53 @@ class AuthViewModel: ObservableObject {
         errorMessage = nil
     }
     
+    @MainActor
     func refreshCurrentUser() async {
-        if let firebaseUser = auth.currentUser {
-            await loadCurrentUser(firebaseUser: firebaseUser)
+        // FIXED: Check if user is still logged in before trying to refresh
+        guard let firebaseUser = Auth.auth().currentUser,
+              let currentUserId = currentUser?.id else {
+            print("⚠️ No authenticated user found, skipping refresh")
+            return
         }
+        
+        do {
+            let document = try await Firestore.firestore()
+                .collection("users")
+                .document(currentUserId)
+                .getDocument()
+            
+            if document.exists, let data = document.data() {
+                // Update the current user with fresh data
+                self.currentUser = User(
+                    firebaseUser: firebaseUser, // Use the safely unwrapped firebaseUser
+                    fullName: data["fullName"] as? String ?? currentUser?.fullName ?? "",
+                    profileImageURL: data["profileImageURL"] as? String,
+                    phoneNumber: data["phoneNumber"] as? String
+                )
+                
+                print("✅ Current user data refreshed - Profile image: \(currentUser?.profileImageURL ?? "none")")
+            }
+        } catch {
+            print("❌ Error refreshing current user: \(error.localizedDescription)")
+        }
+    }
+    
+    /// Update just the profile image URL without a full refresh
+    @MainActor
+    func updateProfileImageURL(_ newURL: String) {
+        // FIXED: Check if user is still logged in before updating
+        guard let firebaseUser = Auth.auth().currentUser,
+              let user = currentUser else {
+            print("⚠️ No authenticated user found, skipping profile image update")
+            return
+        }
+        
+        self.currentUser = User(
+            firebaseUser: firebaseUser, // Use the safely unwrapped firebaseUser
+            fullName: user.fullName,
+            profileImageURL: newURL,
+            phoneNumber: user.phoneNumber
+        )
+        print("✅ Profile image URL updated in AuthViewModel")
     }
 }

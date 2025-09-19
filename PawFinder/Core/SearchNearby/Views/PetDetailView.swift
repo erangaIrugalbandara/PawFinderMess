@@ -6,6 +6,7 @@ struct PetDetailView: View {
     let viewModel = SearchNearbyViewModel.shared
     @Environment(\.dismiss) private var dismiss
     @State private var currentPhotoIndex = 0
+    @State private var showingSightingReport = false // Add local state for sighting report
 
     var body: some View {
         NavigationView {
@@ -75,6 +76,9 @@ struct PetDetailView: View {
                     }
                 }
             }
+        }
+        .sheet(isPresented: $showingSightingReport) {
+            SightingReportView(pet: pet)
         }
     }
 
@@ -265,7 +269,8 @@ struct PetDetailView: View {
     private var quickActions: some View {
         HStack(spacing: 16) {
             Button(action: {
-                viewModel.showSightingReport(for: pet)
+                // Fixed: Use local state instead of viewModel
+                showingSightingReport = true
             }) {
                 HStack(spacing: 10) {
                     ZStack {
@@ -634,7 +639,7 @@ struct ModernDetailRow: View {
     PetDetailView(
         pet: LostPet(
             id: "1",
-            ownerId: "preview_owner_123", // ✅ Added missing ownerId parameter
+            ownerId: "preview_owner_123",
             name: "Buddy",
             breed: "Golden Retriever",
             species: PetSpecies.dog,
